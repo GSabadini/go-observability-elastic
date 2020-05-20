@@ -1,0 +1,21 @@
+apm-server:
+  host: apm-server:8200
+output:
+  elasticsearch:
+    hosts: elasticsearch:9200
+
+#apm-server.frontend.enabled: true
+#apm-server.host: "0.0.0.0:8200"
+#
+#output.elasticsearch:
+#  hosts: ['elasticsearch:9200']
+#  protocol: "https"
+#  username: elastic
+#  password: elastic
+#
+#setup.kibana:
+#  host: "http://kibana:5601"
+#  username: elastic
+#  password: elastic
+#  protocol: "http"
+#  ssl.enabled: false

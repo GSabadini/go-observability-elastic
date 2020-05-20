@@ -1,0 +1,53 @@
+version: '3.6'
+
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
+    volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    environment:
+      - "ES_JAVA_OPTS= -Xmx1g -Xms1g"
+      - "ELASTIC_PASSWORD= elastic"
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - apm
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:$ELASTIC_VERSION
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - apm
+    depends_on:
+      - elasticsearch
+
+  apm-server:
+    container_name: apm_server
+    image: docker.elastic.co/apm/apm-server:$ELASTIC_VERSION
+    command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
+    volumes:
+      - ./config/apm-server.yml:/usr/share/apm-server/apm-server.yml:rw
+    ports:
+      - "8200:8200"
+    networks:
+      - apm
+    depends_on:
+      - elasticsearch
+
+volumes:
+  data01:
+    driver: local
+networks:
+  apm:
+    driver: bridge
