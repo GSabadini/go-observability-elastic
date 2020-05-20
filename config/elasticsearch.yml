@@ -4,6 +4,6 @@ network.host: 0.0.0.0
 discovery.zen.minimum_master_nodes: 1
 discovery.type: single-node
 
-xpack.license.self_generated.type: trial
-xpack.security.enabled: true
-xpack.monitoring.collection.enabled: true
+# xpack.license.self_generated.type: trial
+# xpack.security.enabled: true
+# xpack.monitoring.collection.enabled: true

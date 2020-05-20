@@ -1,6 +1,18 @@
 version: '3.6'
 
 services:
+  app:
+    container_name: "app"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    networks:
+      - apm 
+
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
@@ -37,7 +49,7 @@ services:
     image: docker.elastic.co/apm/apm-server:$ELASTIC_VERSION
     command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
     volumes:
-      - ./config/apm-server.yml:/usr/share/apm-server/apm-server.yml:rw
+      - ./config/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
     ports:
       - "8200:8200"
     networks:
@@ -47,7 +59,6 @@ services:
 
 volumes:
   data01:
-    driver: local
+  
 networks:
   apm:
-    driver: bridge
