@@ -1,21 +1,20 @@
 version: '3.6'
 
 services:
-  # app:
-  #   container_name: "app"
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./:/app
-  #   networks:
-  #     - apm 
+  app:
+    container_name: "app"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    network_mode: host
 
   elasticsearch:
     container_name: elasticsearch
-    hostname: "{{.Node.Hostname}}-elasticsearch"
+    hostname: "elasticsearch"
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
     environment:
       - cluster.name=elastic-test
@@ -33,7 +32,7 @@ services:
 
   kibana:
     container_name: kibana
-    hostname: "{{.Node.Hostname}}-kibana"
+    hostname: "kibana"
     image: docker.elastic.co/kibana/kibana:$ELASTIC_VERSION
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
@@ -49,7 +48,7 @@ services:
 
   apm-server:
     container_name: apm-server
-    hostname: "{{.Node.Hostname}}-apm_server"
+    hostname: "apm-server"
     image: docker.elastic.co/apm/apm-server:$ELASTIC_VERSION
     command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
     volumes:
@@ -61,9 +60,36 @@ services:
     depends_on:
       - elasticsearch
 
+  metricbeat:
+    container_name: metricbeat
+    hostname: "metricbeat"
+    image: docker.elastic.co/beats/metricbeat:$ELASTIC_VERSION
+    user: root
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - ./config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - metricbeat:/usr/share/metricbeat/data
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - KIBANA_HOST=kibana
+      - ELASTIC_APM_SERVER_URL="http://apm-server:8200"
+    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+    networks:
+      - elastic
+    healthcheck:
+      test: metricbeat test config
+      interval: 30s
+      timeout: 15s
+      retries: 5
+
 volumes:
   elasticsearch:
   kibana:
+  metricbeat:
 
 networks:
   elastic:
+    external: true

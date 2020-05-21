@@ -1,12 +1,6 @@
-cluster.name: "apm-demo-cluster"
-node.name: node01
-network.host: 0.0.0.0
-discovery.zen.minimum_master_nodes: 1
-discovery.type: single-node
-
-# cluster.name: "elastic-test"
-# node.name: node01
-# discovery.zen.minimum_master_nodes: 1
-# discovery.type: single-node
-# discovery.seed_hosts: elasticsearch
-# network.host: 0.0.0.0
+#cluster.name: "elastic-test"
+#node.name: node01
+#discovery.zen.minimum_master_nodes: 1
+#discovery.type: single-node
+#discovery.seed_hosts: elasticsearch
+#network.host: 0.0.0.0
