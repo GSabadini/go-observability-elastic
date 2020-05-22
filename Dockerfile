@@ -10,7 +10,7 @@ WORKDIR /build
 COPY . .
 
 RUN go mod download
-RUN go build -a --installsuffix cgo --ldflags="-s" -o main
+RUN go build -o main .
 
 FROM scratch
 
