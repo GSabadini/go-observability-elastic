@@ -1,5 +1,5 @@
 ##for ((i=1;i<=100;i++)); do curl -v --header "Connection: keep-alive" "localhost:3000/ping"; done
-n ?= 10
+n ?= 25
 request:
 	n=$(n); \
 	while [ $${n} -gt 0 ] ; do \
@@ -9,7 +9,16 @@ request:
 	true
 
 up:
-	docker-compose up -d --build elasticsearch kibana apm-server app
+	docker-compose up -d elasticsearch kibana apm-server
+
+up-app-build:
+	docker-compose up -d --build app
+
+up-app:
+	docker-compose up -d app
 
 up-metric:
-	docker-compose up -d metricbeat
+	docker-compose up -d metricbeat app
+
+down:
+	docker-compose down --remove-orphans

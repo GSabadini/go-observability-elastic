@@ -6,24 +6,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      ELASTIC_APM_SERVICE_NAME: "stats"
+      ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
     ports:
       - "3000:3000"
     volumes:
       - ./:/app
-    network_mode: host
+    networks:
+      - elastic
 
   elasticsearch:
     container_name: elasticsearch
     hostname: "elasticsearch"
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
-    environment:
-      - cluster.name=elastic-test
-      - node.name=node01
-      - discovery.zen.minimum_master_nodes=1
-      - discovery.type=single-node
-      - discovery.seed_hosts=elasticsearch
-      - network.host=0.0.0.0
     volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - elasticsearch:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
@@ -34,10 +32,8 @@ services:
     container_name: kibana
     hostname: "kibana"
     image: docker.elastic.co/kibana/kibana:$ELASTIC_VERSION
-    environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - SERVER_NAME="{{.Node.Hostname}}-kibana"
     volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
       - kibana:/usr/share/kibana/data
     ports:
       - "5601:5601"
@@ -72,18 +68,9 @@ services:
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - ./config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
       - metricbeat:/usr/share/metricbeat/data
-    environment:
-      - ELASTICSEARCH_HOST=elasticsearch
-      - KIBANA_HOST=kibana
-      - ELASTIC_APM_SERVER_URL="http://apm-server:8200"
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     networks:
       - elastic
-    healthcheck:
-      test: metricbeat test config
-      interval: 30s
-      timeout: 15s
-      retries: 5
 
 volumes:
   elasticsearch:
@@ -92,4 +79,4 @@ volumes:
 
 networks:
   elastic:
-    external: true
+    driver: bridge
