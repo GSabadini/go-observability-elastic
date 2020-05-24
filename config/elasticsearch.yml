@@ -5,3 +5,4 @@ discovery.type: single-node
 discovery.seed_hosts: elasticsearch
 network.host: 0.0.0.0
 transport.host: 0.0.0.0
+bootstrap.memory_lock: true
