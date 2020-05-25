@@ -9,7 +9,7 @@ request:
 	true
 
 up:
-	docker-compose up -d elasticsearch kibana apm-server
+	docker-compose up -d elasticsearch kibana apm-server heartbeat
 
 up-app-build:
 	docker-compose up -d --build app
