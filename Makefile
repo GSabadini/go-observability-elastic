@@ -4,6 +4,7 @@ request:
 	n=$(n); \
 	while [ $${n} -gt 0 ] ; do \
 		curl -v --header "Connection: keep-alive" "localhost:3000/ping"; \
+		curl -v --header "Connection: keep-alive" "localhost:3000/http"; \
 		n=`expr $$n - 1`; \
 	done; \
 	true

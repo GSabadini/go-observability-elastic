@@ -2,15 +2,20 @@ package main
 
 import (
 	"context"
+	//"database/sql"
 	"fmt"
-	"go.elastic.co/apm"
-	"go.elastic.co/apm/module/apmhttp"
+
 	"net/http"
+
+	"go.elastic.co/apm"
+	"go.elastic.co/apm/module/apmgin"
+	"go.elastic.co/apm/module/apmhttp"
+	//"go.elastic.co/apm/module/apmsql"
+	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
 
 	"github.com/gin-contrib/expvar"
 	"github.com/gin-gonic/gin"
-	"go.elastic.co/apm/module/apmgin"
-	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
+	//_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -68,20 +73,21 @@ func monitorRequest(ctx context.Context) {
 }
 
 //var db *sql.DB
-//
+
 //func connectDB() {
 //	var err error
 //	db, err = apmsql.Open("sqlite3", ":memory:")
 //	if err != nil {
 //		log.Fatal(err)
 //	}
+//
 //	if _, err := db.Exec("CREATE TABLE stats (name TEXT PRIMARY KEY, count INTEGER);"); err != nil {
 //		log.Fatal(err)
 //	}
 //
 //}
-//
-//// updateRequestCount incrementa uma contagem para o nome no banco de dados, retornando a nova contagem.
+
+// updateRequestCount incrementa uma contagem para o nome no banco de dados, retornando a nova contagem.
 //func updateRequestCount(ctx context.Context, name string) (int, error) {
 //	tx, err := db.BeginTx(ctx, nil)
 //	if err != nil {
