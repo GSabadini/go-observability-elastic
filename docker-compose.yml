@@ -21,7 +21,7 @@ services:
     hostname: "elasticsearch"
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
     environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
     ulimits:
       memlock:
         soft: -1
@@ -47,6 +47,7 @@ services:
       - elastic
     depends_on:
       - elasticsearch
+    restart: always
 
   apm-server:
     container_name: apm-server
@@ -61,6 +62,22 @@ services:
       - elastic
     depends_on:
       - elasticsearch
+    restart: always 
+
+  heartbeat:
+    container_name: heartbeat
+    hostname: "hearbeat"
+    image: docker.elastic.co/beats/heartbeat:$ELASTIC_VERSION
+    user: root
+    volumes:
+      - ./config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: --strict.perms=false -e  # -e flag to log to stderr and disable syslog/file output
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+    restart: always 
 
   metricbeat:
     container_name: metricbeat
@@ -70,13 +87,16 @@ services:
     volumes:
       - /proc:/hostfs/proc:ro
       - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - ./config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
       - metricbeat:/usr/share/metricbeat/data
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     networks:
       - elastic
+    depends_on:
+      - elasticsearch
+    restart: always 
 
 volumes:
   elasticsearch:

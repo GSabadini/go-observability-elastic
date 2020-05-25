@@ -3,13 +3,7 @@ apm-server:
 
 output:
   elasticsearch:
-    hosts: elasticsearch:9200
-
-# apm-server.frontend.enabled: true
-# apm-server.host: "0.0.0.0:8200"
-
-# output.elasticsearch:
-#   hosts: ['elasticsearch:9200']
+    hosts: ["elasticsearch:9200"]
 
 # setup.kibana:
 #   host: "http://kibana:5601"

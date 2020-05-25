@@ -1,10 +1,11 @@
 # go-apm-elastic
 
 
-- APM metrics
-- Golang metrics
-- Docker metrics
-- System metrics
+- APM metrics (APM Server)
+- Golang metrics (Metricbeat)
+- Docker metrics (Metricbeat)
+- System metrics (Metricbeat)
+- Health check (Heartbeat)
 
 Iniciar kibana, elasticsearch e apm-server
 ```sh
@@ -17,7 +18,12 @@ Iniciar app
 make up-app
 ```
 
-Iniciar metricbeat
+Iniciar Heartbeat
+```sh
+make up-heart
+```
+
+Iniciar Metricbeat
 ```sh
 make up-metric
 ```

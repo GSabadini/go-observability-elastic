@@ -10,6 +10,7 @@ import (
 	"go.elastic.co/apm"
 	"go.elastic.co/apm/module/apmgin"
 	"go.elastic.co/apm/module/apmhttp"
+
 	//"go.elastic.co/apm/module/apmsql"
 	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
 
@@ -29,10 +30,16 @@ func main() {
 		})
 	})
 
-	engine.GET("/http", func(c *gin.Context) {
+	engine.GET("/http-client", func(c *gin.Context) {
 		monitorRequest(c.Request.Context())
 		c.JSON(200, gin.H{
 			"message": "success",
+		})
+	})
+
+	engine.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "UP",
 		})
 	})
 

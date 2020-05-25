@@ -4,7 +4,6 @@ request:
 	n=$(n); \
 	while [ $${n} -gt 0 ] ; do \
 		curl -v --header "Connection: keep-alive" "localhost:3000/ping"; \
-		curl -v --header "Connection: keep-alive" "localhost:3000/http"; \
 		n=`expr $$n - 1`; \
 	done; \
 	true
@@ -20,6 +19,9 @@ up-app:
 
 up-metric:
 	docker-compose up -d metricbeat app
+
+up-heart:
+	docker-compose up -d heartbeat app
 
 down:
 	docker-compose down --remove-orphans

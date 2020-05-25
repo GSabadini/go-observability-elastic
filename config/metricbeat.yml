@@ -68,8 +68,11 @@ metricbeat.modules:
     - filesystem
     - fsstat
   processors:
-  - drop_event.when.regexp:
-      system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib)($|/)'
+    - drop_event.when.regexp:
+        system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib)($|/)'
+
+# processors:
+#   - add_docker_metadata: ~
 
 - module: system
   period: 15m
@@ -78,7 +81,7 @@ metricbeat.modules:
 
 #========================== Elasticsearch output ===============================
 output.elasticsearch:
-  hosts: elasticsearch:9200
+  hosts: ["elasticsearch:9200"]
 
 #============================== Dashboards =====================================
 setup.dashboards.enabled: true
