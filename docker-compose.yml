@@ -66,9 +66,9 @@ services:
 
   heartbeat:
     container_name: heartbeat
-    hostname: "hearbeat"
+    hostname: "heartbeat"
     image: docker.elastic.co/beats/heartbeat:$ELASTIC_VERSION
-    user: root
+#    user: root
     volumes:
       - ./config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
       # - /var/run/docker.sock:/var/run/docker.sock:ro

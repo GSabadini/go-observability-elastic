@@ -1,5 +1,5 @@
 ##for ((i=1;i<=100;i++)); do curl -v --header "Connection: keep-alive" "localhost:3000/ping"; done
-n ?= 25
+n ?= 250
 request:
 	n=$(n); \
 	while [ $${n} -gt 0 ] ; do \

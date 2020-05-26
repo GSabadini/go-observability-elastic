@@ -5,5 +5,5 @@ output:
   elasticsearch:
     hosts: ["elasticsearch:9200"]
 
-# setup.kibana:
-#   host: "http://kibana:5601"
+setup.kibana:
+  host: "http://kibana:5601"

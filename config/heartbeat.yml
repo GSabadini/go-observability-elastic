@@ -1,0 +1,16 @@
+heartbeat.monitors:
+  - type: http
+    schedule: '@every 10s'
+    name: App Health
+    urls:
+      - http://app:3000/health
+      - http://kibana:5601
+      - http://elasticsearch:9200
+    check.request.method: GET
+    check.response.status: 200
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+setup.kibana:
+  host: "http://kibana:5601"
