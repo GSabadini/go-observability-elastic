@@ -3,7 +3,8 @@ heartbeat.monitors:
     schedule: '@every 10s'
     name: App Health
     urls:
-      - http://app:3000/health
+      - http://go-app:3000/health
+      - http://go-info:3001/health
       - http://kibana:5601
       - http://elasticsearch:9200
     check.request.method: GET

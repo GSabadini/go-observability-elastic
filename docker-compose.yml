@@ -1,16 +1,32 @@
 version: '3.6'
 
 services:
-  app:
-    container_name: "app"
+  go-app:
+    container_name: "go-app"
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: go-app/Dockerfile
     environment:
-      ELASTIC_APM_SERVICE_NAME: "stats"
+      GO_INFO_URL: "http://go-info:3001/info"
+      ELASTIC_APM_SERVICE_NAME: "go-app"
       ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
     ports:
       - "3000:3000"
+    volumes:
+      - ./:/app
+    networks:
+      - elastic
+
+  go-info:
+    container_name: "go-info"
+    build:
+      context: .
+      dockerfile: go-info/Dockerfile
+    environment:
+      ELASTIC_APM_SERVICE_NAME: "go-info"
+      ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
+    ports:
+      - "3001:3001"
     volumes:
       - ./:/app
     networks:

@@ -2,47 +2,60 @@ package main
 
 import (
 	"context"
-	//"database/sql"
 	"fmt"
-
+	"io/ioutil"
 	"net/http"
+	"os"
 
 	"go.elastic.co/apm"
 	"go.elastic.co/apm/module/apmgin"
 	"go.elastic.co/apm/module/apmhttp"
 
+	//"database/sql"
+	//_ "github.com/mattn/go-sqlite3"
 	//"go.elastic.co/apm/module/apmsql"
 	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
 
 	"github.com/gin-contrib/expvar"
 	"github.com/gin-gonic/gin"
-	//_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
 	engine := gin.New()
 
+	//APM Agent
 	engine.Use(apmgin.Middleware(engine))
 
+	//Route used by APM for inbound http request metrics
 	engine.GET("/ping", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
-	engine.GET("/http-client", func(c *gin.Context) {
-		monitorRequest(c.Request.Context())
+	//Route used by APM for outbound http request metrics
+	engine.GET("/info", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+
+		response := monitorRequest(c.Request.Context())
 		c.JSON(200, gin.H{
-			"message": "success",
+			"message":  "success",
+			"response": response,
 		})
 	})
 
+	//Route used by Metricbeat for golang metrics
 	engine.GET("/health", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+
 		c.JSON(200, gin.H{
 			"status": "UP",
 		})
 	})
 
+	//Route used by APM for query metrics
 	//engine.GET("/query", func(c *gin.Context) {
 	//	var vars = c.Request.URL.Query()
 	//	var name = vars.Get("name")
@@ -57,15 +70,18 @@ func main() {
 	//	})
 	//})
 
+	//Route used by Metricbeat for golang metrics
 	engine.GET("/debug/vars", expvar.Handler())
 
-	engine.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	if err := engine.Run(":3000"); err != nil {
+		panic(err)
+	}
 }
 
-func monitorRequest(ctx context.Context) {
+func monitorRequest(ctx context.Context) string {
 	span, ctx := apm.StartSpan(ctx, "monitorRequest", "custom")
 	defer span.End()
-	req, _ := http.NewRequest(http.MethodGet, "https://enzzfdy8g188g.x.pipedream.net", nil)
+	req, _ := http.NewRequest(http.MethodGet, os.Getenv("GO_INFO_URL"), nil)
 
 	// Faça instrumentação do cliente HTTP e adicione o contexto circundante à solicitação.
 	// Isso fará com que uma duração seja gerada para a solicitação HTTP de saída, incluindo
@@ -76,7 +92,15 @@ func monitorRequest(ctx context.Context) {
 		fmt.Println(err)
 		apm.CaptureError(ctx, err).Send()
 	}
+
 	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(body)
 }
 
 //var db *sql.DB

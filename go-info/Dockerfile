@@ -6,16 +6,11 @@ ENV GO111MODULE=on \
     GOARCH=amd64
 
 WORKDIR /build
-
-COPY . .
-
+COPY /go-info .
 RUN go mod download
 RUN go build -a --installsuffix cgo --ldflags="-s" -o main
 
 FROM scratch
-
 COPY --from=builder /build .
-
 ENTRYPOINT ["./main"]
-
-EXPOSE 3000
+EXPOSE 3001

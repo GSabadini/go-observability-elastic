@@ -28,7 +28,7 @@ metricbeat.modules:
     - expvar
     - heap
   period: 10s
-  hosts: ["app:3000"]
+  hosts: ["go-app:3000", "go-info:3001"]
   heap.path: "/debug/vars"
   expvar:
     namespace: "metricbeat"

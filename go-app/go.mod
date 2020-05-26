@@ -1,4 +1,4 @@
-module github.com/GSabadini/go-apm-elastic
+module github.com/GSabadini/go-apm-elastic/go-app
 
 go 1.14
 
@@ -8,6 +8,4 @@ require (
 	go.elastic.co/apm v1.8.0
 	go.elastic.co/apm/module/apmgin v1.8.0
 	go.elastic.co/apm/module/apmhttp v1.8.0
-	go.elastic.co/apm/module/apmsql v1.8.0
-	golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7 // indirect
 )
