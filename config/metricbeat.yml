@@ -79,6 +79,30 @@ metricbeat.modules:
   metricsets:
     - uptime
 
+#========================== Redis Module ===============================
+- module: redis
+  metricsets: ["info", "key", "keyspace"]
+  key.patterns:
+    - pattern: '*'
+      limit: 20
+  enabled: true
+  period: 10s
+  # Redis hosts
+  hosts: ["redis:6379"]
+
+#========================== Elasticsearch Module ===============================
+- module: elasticsearch
+  metricsets:
+    - node
+    - node_stats
+    #- index
+    #- index_recovery
+    #- index_summary
+    #- shard
+    #- ml_job
+  period: 10s
+  hosts: ["elasticsearch:9200"]
+
 #========================== Elasticsearch output ===============================
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]

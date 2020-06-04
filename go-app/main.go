@@ -1,74 +1,50 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
+	"database/sql"
+	"log"
 
-	"go.elastic.co/apm"
-	"go.elastic.co/apm/module/apmgin"
-	"go.elastic.co/apm/module/apmhttp"
-
-	//"database/sql"
-	//_ "github.com/mattn/go-sqlite3"
-	//"go.elastic.co/apm/module/apmsql"
-	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
-
+	"github.com/GSabadini/go-apm-elastic/go-app/handler"
 	"github.com/gin-contrib/expvar"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
+	"go.elastic.co/apm/module/apmgin"
+	"go.elastic.co/apm/module/apmsql"
+	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
 )
 
 func main() {
-	engine := gin.New()
+	//Connect database
+	//db, err := newSQLiteHandler()
+	//if err != nil {
+	//	log.Println(err)
+	//}
+
+	var (
+		//Connect cache redis
+		clientRedis = newClientRedis()
+
+		//Start Gin
+		engine = gin.New()
+	)
 
 	//APM Agent
 	engine.Use(apmgin.Middleware(engine))
 
 	//Route used by APM for inbound http request metrics
-	engine.GET("/ping", func(c *gin.Context) {
-		c.Header("Content-Type", "application/json")
+	engine.GET("/ping", handler.Ping)
 
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	//Route used by APM for external http request metrics
+	engine.GET("/http-external", handler.HttpExternal)
 
-	//Route used by APM for outbound http request metrics
-	engine.GET("/info", func(c *gin.Context) {
-		c.Header("Content-Type", "application/json")
-
-		response := monitorRequest(c.Request.Context())
-		c.JSON(200, gin.H{
-			"message":  "success",
-			"response": response,
-		})
-	})
-
-	//Route used by Metricbeat for golang metrics
-	engine.GET("/health", func(c *gin.Context) {
-		c.Header("Content-Type", "application/json")
-
-		c.JSON(200, gin.H{
-			"status": "UP",
-		})
-	})
+	//Route used by Heartbeat for uptime metrics
+	engine.GET("/health", handler.Health)
 
 	//Route used by APM for query metrics
-	//engine.GET("/query", func(c *gin.Context) {
-	//	var vars = c.Request.URL.Query()
-	//	var name = vars.Get("name")
-	//	requestCount, err := updateRequestCount(c.Request.Context(), name)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//
-	//	c.JSON(200, gin.H{
-	//		"message": "success",
-	//		"count":   requestCount,
-	//	})
-	//})
+	//engine.GET("/query/:name", handler.Query(db))
+
+	//Route used by Metricbeat for redis metrics
+	engine.GET("/cache/:key", handler.Cache(clientRedis))
 
 	//Route used by Metricbeat for golang metrics
 	engine.GET("/debug/vars", expvar.Handler())
@@ -78,68 +54,31 @@ func main() {
 	}
 }
 
-func monitorRequest(ctx context.Context) string {
-	span, ctx := apm.StartSpan(ctx, "monitorRequest", "custom")
-	defer span.End()
-	req, _ := http.NewRequest(http.MethodGet, os.Getenv("GO_INFO_URL"), nil)
+func newClientRedis() *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
-	// Faça instrumentação do cliente HTTP e adicione o contexto circundante à solicitação.
-	// Isso fará com que uma duração seja gerada para a solicitação HTTP de saída, incluindo
-	// um cabeçalho de rastreamento distribuído para continuar o rastreamento no serviço de destino.
-	client := apmhttp.WrapClient(http.DefaultClient)
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		fmt.Println(err)
-		apm.CaptureError(ctx, err).Send()
-	}
+	pong, err := client.Ping().Result()
+	log.Println("connected redis", pong, err)
 
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(body)
+	return client
 }
 
-//var db *sql.DB
+func newSQLiteHandler() (*sql.DB, error) {
+	db, err := apmsql.Open("sqlite3", ":memory:")
+	if err != nil {
+		return &sql.DB{}, err
+	}
 
-//func connectDB() {
-//	var err error
-//	db, err = apmsql.Open("sqlite3", ":memory:")
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	if _, err := db.Exec("CREATE TABLE stats (name TEXT PRIMARY KEY, count INTEGER);"); err != nil {
-//		log.Fatal(err)
-//	}
-//
-//}
+	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS stats (name TEXT PRIMARY KEY, count INTEGER);"); err != nil {
+		return &sql.DB{}, err
+	}
 
-// updateRequestCount incrementa uma contagem para o nome no banco de dados, retornando a nova contagem.
-//func updateRequestCount(ctx context.Context, name string) (int, error) {
-//	tx, err := db.BeginTx(ctx, nil)
-//	if err != nil {
-//		return -1, err
-//	}
-//	row := tx.QueryRowContext(ctx, "SELECT count FROM stats WHERE name=?", name)
-//	var count int
-//	switch err := row.Scan(&count); err {
-//	case nil:
-//		count++
-//		if _, err := tx.ExecContext(ctx, "UPDATE stats SET count=? WHERE name=?", count, name); err != nil {
-//			return -1, err
-//		}
-//	case sql.ErrNoRows:
-//		count = 1
-//		if _, err := tx.ExecContext(ctx, "INSERT INTO stats (name, count) VALUES (?, ?)", name, count); err != nil {
-//			return -1, err
-//		}
-//	default:
-//		return -1, err
-//	}
-//
-//	return count, tx.Commit()
-//}
+	log.Println("Database connected")
+
+	return db, nil
+}
+

@@ -7,13 +7,21 @@ services:
       context: .
       dockerfile: go-app/Dockerfile
     environment:
-      GO_INFO_URL: "http://go-info:3001/info"
+      GO_INFO_URL: "http://go-info:3001"
       ELASTIC_APM_SERVICE_NAME: "go-app"
       ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
     ports:
-      - "3000:3000"
+      - 3000:3000
     volumes:
       - ./:/app
+    networks:
+      - elastic
+
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    expose:
+      - 6379
     networks:
       - elastic
 
@@ -23,14 +31,28 @@ services:
       context: .
       dockerfile: go-info/Dockerfile
     environment:
+      GO_APP_URL: "http://go-app:3000"
       ELASTIC_APM_SERVICE_NAME: "go-info"
       ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
     ports:
-      - "3001:3001"
+      - 3001:3001
     volumes:
       - ./:/app
+    depends_on:
+      - postgres
     networks:
       - elastic
+      - database
+
+  postgres:
+    container_name: "postgres"
+    image: "postgres:12.2-alpine"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: info
+    networks:
+      - database
 
   elasticsearch:
     container_name: elasticsearch
@@ -46,7 +68,7 @@ services:
       - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - elasticsearch:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
+      - 9200:9200
     networks:
       - elastic
 
@@ -58,7 +80,7 @@ services:
       - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
       - kibana:/usr/share/kibana/data
     ports:
-      - "5601:5601"
+      - 5601:5601
     networks:
       - elastic
     depends_on:
@@ -73,7 +95,7 @@ services:
     volumes:
       - ./config/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
     ports:
-      - "8200:8200"
+      - 8200:8200
     networks:
       - elastic
     depends_on:
@@ -120,5 +142,7 @@ volumes:
   metricbeat:
 
 networks:
+  database:
+    driver: bridge
   elastic:
     driver: bridge

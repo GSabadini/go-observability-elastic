@@ -3,7 +3,7 @@ n ?= 50
 request:
 	n=$(n); \
 	while [ $${n} -gt 0 ] ; do \
-		curl -v --header "Connection: keep-alive" "localhost:3000/ping"; \
+		curl -v --header "Connection: keep-alive" "http://localhost:3001/query/gabriel"; \
 		n=`expr $$n - 1`; \
 	done; \
 	true
