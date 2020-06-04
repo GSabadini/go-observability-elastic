@@ -1,6 +1,6 @@
 # Go Observability Elastic
 
-1. **APM Server**
+- **APM Server**
     - Web requests
     - SQL queries
     - Outgoing HTTP requests
@@ -16,7 +16,7 @@
 - **Heartbeat**
     - Elasticsearch
     - Kibana
-    - Golang apss
+    - Golang apps
 
 ---
 
