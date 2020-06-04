@@ -9,7 +9,7 @@ request:
 	true
 
 up:
-	docker-compose up -d elasticsearch kibana apm-server heartbeat
+	docker-compose up -d elasticsearch kibana apm-server heartbeat postgres redis
 
 up-go-app-build:
 	docker-compose up -d --build go-app

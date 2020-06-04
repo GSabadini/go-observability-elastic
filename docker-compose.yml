@@ -38,8 +38,6 @@ services:
       - 3001:3001
     volumes:
       - ./:/app
-    depends_on:
-      - postgres
     networks:
       - elastic
       - database
