@@ -3,11 +3,11 @@ package handler
 import (
 	"context"
 	"database/sql"
-	"go.elastic.co/apm"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.elastic.co/apm"
 )
 
 func Query(db *sql.DB) gin.HandlerFunc {

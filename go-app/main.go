@@ -68,7 +68,7 @@ func newClientRedis() *redis.Client {
 }
 
 func newSQLiteHandler() (*sql.DB, error) {
-	db, err := apmsql.Open("sqlite3", ":memory:")
+	db, err := apmsql.Open("sqlite3", "./test.db")
 	if err != nil {
 		return &sql.DB{}, err
 	}

@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/gin-contrib/expvar v0.0.1
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-redis/redis v6.15.3-0.20190424063336-97e6ed817821+incompatible
 	github.com/go-redis/redis/v8 v8.0.0-beta.2
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	go.elastic.co/apm v1.8.0
