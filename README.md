@@ -14,9 +14,7 @@
     - Redis Metrics
 
 - **Heartbeat**
-    - Elasticsearch
-    - Kibana
-    - Golang apps
+    - Uptime Metrics
 
 ---
 
