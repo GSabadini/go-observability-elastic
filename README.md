@@ -43,7 +43,7 @@ make up-go-info
 
 #### go-app
 
-- Start app in port 3000
+- Start app
 ```sh
 make up-go-info
 ```
@@ -74,7 +74,7 @@ make up-metric
 make up-go-info-build
 ```
 
-Build app go-app
+- Build app go-app
 ```sh
 make up-go-app-build
 ```
