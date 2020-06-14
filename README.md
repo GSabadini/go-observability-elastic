@@ -56,7 +56,7 @@ make up-go-info
 | --------------- | :---------------------: | :-----------------:    |
 | `/ping`         | `GET`                   | `Pong response`        |
 | `/health`       | `GET`                   | `Healthcheck`          |
-| `/query/{name}` | `GET`                   | `Query in SQLite`      |
+| `/query/{name}` | `GET`                   | `Query in MySQL`      |
 | `/cache/{key}`  | `GET`                   | `Find in Redis`        |
 | `/http-external`| `GET`                   | `HTTP request for app go-info` |
 | `/debug/vars`   | `GET`                   | `Metrics for golang metrics` |
@@ -81,7 +81,8 @@ make up-go-app-build
 
 - Send request
 ```sh
-make request PORT PATH
+##make request n=100 p=3001 r=/query/test
+make request NUM_REQUESTS PORT RESOURCE
 ```
 
 - Kill all containers

@@ -10,15 +10,15 @@ import (
 	"github.com/go-redis/redis"
 	"go.elastic.co/apm/module/apmgin"
 	"go.elastic.co/apm/module/apmsql"
-	//_ "go.elastic.co/apm/module/apmsql/sqlite3"
+	_ "go.elastic.co/apm/module/apmsql/mysql"
 )
 
 func main() {
 	//Connect database
-	//db, err := newSQLiteHandler()
-	//if err != nil {
-	//	log.Println(err)
-	//}
+	db, err := newMySQLHandler()
+	if err != nil {
+		log.Println(err)
+	}
 
 	var (
 		//Connect cache redis
@@ -41,7 +41,7 @@ func main() {
 	engine.GET("/health", handler.Health)
 
 	//Route used by APM for query metrics
-	//engine.GET("/query/:name", handler.Query(db))
+	engine.GET("/query/:name", handler.Query(db))
 
 	//Route used by Metricbeat for redis metrics
 	engine.GET("/cache/:key", handler.Cache(clientRedis))
@@ -67,13 +67,13 @@ func newClientRedis() *redis.Client {
 	return client
 }
 
-func newSQLiteHandler() (*sql.DB, error) {
-	db, err := apmsql.Open("sqlite3", "./test.db")
+func newMySQLHandler() (*sql.DB, error) {
+	db, err := apmsql.Open("mysql", "root:dev@tcp(mysql:3306)/app")
 	if err != nil {
 		return &sql.DB{}, err
 	}
 
-	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS stats (name TEXT PRIMARY KEY, count INTEGER);"); err != nil {
+	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS stats (name VARCHAR(50) PRIMARY KEY, count INTEGER);"); err != nil {
 		return &sql.DB{}, err
 	}
 
